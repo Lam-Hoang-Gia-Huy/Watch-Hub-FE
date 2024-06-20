@@ -1,0 +1,79 @@
+.item-cover-image {
+  height: 200px; /* Adjust height as needed */
+  width: 100%; /* Ensures proportional scaling */
+  object-fit: cover; /* Maintains aspect ratio */
+}
+.item-price {
+  content: "Posted: ";
+  color: #d0021b;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.33;
+  margin: 2px 4px 0 0;
+}
+.slick-arrow.slick-prev {
+  color: red;
+  background-color: rgb(229, 243, 243);
+}
+.slick-arrow.slick-next {
+  color: red;
+  background-color: rgb(229, 243, 243);
+}
+.watch-description {
+  margin-top: 20px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background-color: #fff;
+  order: var(--c189eou8-0);
+  position: relative;
+}
+.watch-description .appraisal {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background-color: #f4f4f4;
+}
+.watch-description .appraisal .row {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.watch-description .appraisal .row .attribute {
+  color: #595959;
+  font-size: 18px;
+}
+.thumbnails {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+.item-details {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.item-seller,
+.item-post-date {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.item-post-date::before {
+  content: "Since: ";
+  font-weight: bold;
+}
+.item-seller::before {
+  content: "Posted by: ";
+  font-weight: bold;
+}
+.contentStyle {
+  height: 300px !important;
+  object-fit: cover !important;
+  margin: 0 auto !important;
+}
+.formTitle {
+  text-align: center;
+}
