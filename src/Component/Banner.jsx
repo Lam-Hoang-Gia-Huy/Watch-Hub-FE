@@ -1,9 +1,8 @@
 import React from "react";
 import { Carousel } from "antd";
-import bannerimage1 from "../Image/bannerimage1.png";
-import bannerimage2 from "../Image/bannerimage2.jpg";
-import bannerimage3 from "../Image/bannerimage3.jpg";
-import bannerimage4 from "../Image/bannerimage4.jpg";
+import bannerimage1 from "../Image/pngtree-healthy-milk-poster-background-material-image_143414.jpg";
+import bannerimage2 from "../Image/png-clipart-black-and-white-cow-powdered-milk-dairy-product-cow-s-milk-dairy-cattle-posters-decorative-elements-food-decorative.png";
+import bannerimage3 from "../Image/pngtree-cartoon-baby-maternity-background-free-download-image_142918.jpg";
 
 import Image from "antd";
 const contentStyle = {
@@ -30,9 +29,6 @@ const Banner = () => {
       </div>
       <div>
         <img src={bannerimage3} alt="Banner 3" style={contentStyle} />
-      </div>
-      <div>
-        <img src={bannerimage4} alt="Banner 4" style={contentStyle} />
       </div>
     </Carousel>
   );

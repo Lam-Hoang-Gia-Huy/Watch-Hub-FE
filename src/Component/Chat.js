@@ -110,11 +110,11 @@ const Chat = ({ onNewMessage }) => {
   const sendMessage = async () => {
     try {
       const payload = {
-        message: newMessage, // Ensure this key matches the backend expectation
+        message: newMessage,
         senderId: auth.id,
       };
 
-      console.log("Sending payload:", payload); // Debug log
+      console.log("Sending payload:", payload);
 
       const response = await axios.post(
         `http://localhost:8080/api/v1/chat/${selectedSession.id}/messages`,
@@ -127,7 +127,7 @@ const Chat = ({ onNewMessage }) => {
         }
       );
 
-      console.log("Received response:", response.data); // Debug log
+      console.log("Received response:", response.data);
 
       stompClient.current.publish({
         destination: "/app/chat.sendMessage",
@@ -148,28 +148,34 @@ const Chat = ({ onNewMessage }) => {
     <MainContainer responsive style={{ height: "600px" }}>
       <Sidebar position="left">
         <Search placeholder="Search..." />
-        <ConversationList>
-          {sessions.map((session) => {
-            const otherUser =
-              session.seller.id === auth.id
-                ? session.appraiser
-                : session.seller;
-            return (
-              <Conversation
-                key={session.id}
-                name={`${otherUser.firstName} ${otherUser.lastName}`}
-                info={session.watch.name}
-                onClick={() => handleSessionClick(session)}
-              >
-                <Avatar
-                  name={otherUser.firstName}
-                  src={otherUser.avatarUrl}
-                  status="available"
-                />
-              </Conversation>
-            );
-          })}
-        </ConversationList>
+        {sessions.length > 0 ? (
+          <ConversationList>
+            {sessions.map((session) => {
+              const otherUser =
+                session.seller.id === auth.id
+                  ? session.appraiser
+                  : session.seller;
+              return (
+                <Conversation
+                  key={session.id}
+                  name={`${otherUser.firstName} ${otherUser.lastName}`}
+                  info={session.watch.name}
+                  onClick={() => handleSessionClick(session)}
+                >
+                  <Avatar
+                    name={otherUser.firstName}
+                    src={otherUser.avatarUrl}
+                    status="available"
+                  />
+                </Conversation>
+              );
+            })}
+          </ConversationList>
+        ) : (
+          <div style={{ padding: "20px", textAlign: "center" }}>
+            No chat sessions available.
+          </div>
+        )}
       </Sidebar>
 
       {selectedSession ? (
@@ -177,12 +183,23 @@ const Chat = ({ onNewMessage }) => {
           <ConversationHeader>
             <ConversationHeader.Back />
             <Avatar
-              name={`${selectedSession.seller.firstName} ${selectedSession.seller.lastName}`}
-              src={selectedSession.seller.avatarUrl}
+              name={
+                selectedSession.seller.id === auth.id
+                  ? `${selectedSession.appraiser.firstName} ${selectedSession.appraiser.lastName}`
+                  : `${selectedSession.seller.firstName} ${selectedSession.seller.lastName}`
+              }
+              src={
+                selectedSession.seller.id === auth.id
+                  ? selectedSession.appraiser.avatarUrl
+                  : selectedSession.seller.avatarUrl
+              }
             />
             <ConversationHeader.Content
-              info="Active now"
-              userName={`${selectedSession.seller.firstName} ${selectedSession.seller.lastName}`}
+              userName={
+                selectedSession.seller.id === auth.id
+                  ? `${selectedSession.appraiser.firstName} ${selectedSession.appraiser.lastName}`
+                  : `${selectedSession.seller.firstName} ${selectedSession.seller.lastName}`
+              }
             />
             <ConversationHeader.Actions>
               {/* Add any actions like call buttons if needed */}
@@ -219,15 +236,45 @@ const Chat = ({ onNewMessage }) => {
           />
         </ChatContainer>
       ) : (
-        <div>Please select a chat session</div>
+        <div style={{ padding: "20px", textAlign: "center" }}>
+          Please select a chat session
+        </div>
       )}
 
-      <Sidebar position="right">
-        <ExpansionPanel open title="INFO">
-          <p>Chat session information</p>
-        </ExpansionPanel>
-        {/* Add more panels as needed */}
-      </Sidebar>
+      {selectedSession && (
+        <Sidebar position="right">
+          <ExpansionPanel open title="INFO">
+            <p>
+              <strong>Watch Name:</strong> {selectedSession.watch.name}
+            </p>
+            <p>
+              <strong>Brand:</strong> {selectedSession.watch.brand}
+            </p>
+            <p>
+              <strong>Description:</strong> {selectedSession.watch.description}
+            </p>
+            <p>
+              <strong>Status:</strong>{" "}
+              {selectedSession.watch.status ? "Available" : "Not Available"}
+            </p>
+            <p>
+              <strong>Price:</strong>{" "}
+              {selectedSession.watch.price
+                ? `$${selectedSession.watch.price}`
+                : "N/A"}
+            </p>
+            <p>
+              <strong>Created Date:</strong>{" "}
+              {new Date(selectedSession.watch.createdDate).toLocaleString()}
+            </p>
+            <img
+              src={selectedSession.watch.imageUrl[0]}
+              alt={selectedSession.watch.name}
+              style={{ width: "60%", height: "auto" }}
+            />
+          </ExpansionPanel>
+        </Sidebar>
+      )}
     </MainContainer>
   );
 };

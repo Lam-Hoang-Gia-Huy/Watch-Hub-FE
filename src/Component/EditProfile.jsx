@@ -1,52 +1,105 @@
 import React, { useState, useEffect } from "react";
 import { Layout, Row, Col, Form, Input, Button, message } from "antd";
-import axios from "axios";
-import useAuth from "./Hooks/useAuth"; // Import useAuth hook
+import useAuth from "./Hooks/useAuth";
 import ImageUpload from "./ImageUpload";
 
 const { Content } = Layout;
 
 const EditProfile = () => {
-  const { auth } = useAuth(); // Use the useAuth hook
-  const { name, phone, avatarUrl } = auth;
-  const [userData, setUserData] = useState(null);
+  const { auth, setAuth } = useAuth();
+  const [form] = Form.useForm();
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [initialValues, setInitialValues] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/v1/user/${auth.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setInitialValues(data);
+          form.setFieldsValue(data);
+        } else {
+          message.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        message.error("Error fetching user data: " + error.message);
+      }
+    };
+
+    fetchUserData();
+  }, [auth, form]);
+
   const handleFilesSelected = (fileList) => {
     setSelectedFiles(fileList.map((file) => file.originFileObj));
   };
 
   const onFinish = async (values) => {
+    const formData = new FormData();
+    const updatedValues = { ...initialValues, ...values }; // Merge old and new values
+
+    formData.append(
+      "user",
+      new Blob([JSON.stringify(updatedValues)], { type: "application/json" })
+    );
+    if (selectedFiles.length > 0) {
+      formData.append("avatar", selectedFiles[0]);
+    }
+
     try {
-      await axios.put(
-        `https://6656dd4e9f970b3b36c6e348.mockapi.io/Login/1`,
-        values
+      const response = await fetch(
+        `http://localhost:8080/api/v1/user/${auth.id}`,
+        {
+          method: "PUT",
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
       );
-      message.success("Changed successfully!");
-      // Optionally, redirect to the profile page or show a success message
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        message.success("Profile updated successfully!");
+        setAuth({ ...auth, avatarUrl: updatedUser.avatarUrl });
+      } else if (response.status === 403) {
+        message.error("You do not have permission to update this profile.");
+      } else {
+        message.error("Profile update failed!");
+      }
     } catch (error) {
-      message.error("Failed!");
+      message.error("Error updating profile: " + error.message);
     }
   };
+
+  if (!initialValues) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Content style={{ padding: "30px 300px 200px", flexGrow: 1 }}>
       <div style={{ padding: 24, background: "#f0f2f5", borderRadius: 16 }}>
         <Row justify="center">
           <Col span={12}>
-            <ImageUpload
-              onFilesSelected={handleFilesSelected}
-              imgNum={1}
-            ></ImageUpload>
+            <ImageUpload onFilesSelected={handleFilesSelected} imgNum={1} />
           </Col>
           <Col span={12}>
             <h1>Edit Profile</h1>
             <Form
+              form={form}
               name="editProfile"
-              initialValues={{ name, phone }} // Set initial values for the form fields
+              initialValues={initialValues}
               onFinish={onFinish}
             >
               <Form.Item
-                label="User Name"
+                label="Username"
                 name="name"
                 rules={[
                   { required: true, message: "Please input your username!" },
@@ -54,15 +107,7 @@ const EditProfile = () => {
               >
                 <Input />
               </Form.Item>
-              <Form.Item
-                label="Phone"
-                name="phone"
-                rules={[
-                  { required: true, message: "Please input your phone!" },
-                ]}
-              >
-                <Input />
-              </Form.Item>
+
               <Form.Item>
                 <Button type="primary" htmlType="submit">
                   Save

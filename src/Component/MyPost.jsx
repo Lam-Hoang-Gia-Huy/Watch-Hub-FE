@@ -4,7 +4,7 @@ import {
   NotificationOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Layout, Menu, theme, Row, Col, Card, Tag } from "antd";
+import { Layout, Menu, theme, Row, Col, Card, Tag, Empty } from "antd";
 import axios from "axios";
 import useAuth from "./Hooks/useAuth";
 
@@ -79,6 +79,21 @@ const MyPost = () => {
 
   const renderWatches = () => {
     const sectionWatches = watches[selectedSection] || [];
+    if (sectionWatches.length === 0) {
+      return (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "280px",
+          }}
+        >
+          <Empty description={`No ${selectedSection} watches available`} />
+        </div>
+      );
+    }
+
     return (
       <Row gutter={[16, 16]}>
         {sectionWatches.map((watch) => (

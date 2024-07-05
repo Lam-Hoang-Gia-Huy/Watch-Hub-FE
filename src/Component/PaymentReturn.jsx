@@ -11,7 +11,6 @@ const PaymentReturn = () => {
   const navigate = useNavigate();
   const paymentProcessed = useRef(false);
 
-  // Debounce function to limit the rate at which a function can fire
   const debounce = (func, wait) => {
     let timeout;
     return function (...args) {
@@ -21,7 +20,6 @@ const PaymentReturn = () => {
     };
   };
 
-  // Handle payment return with debouncing
   const handlePaymentReturn = debounce(async () => {
     if (paymentProcessed.current) {
       console.log("Payment already processed, skipping...");
@@ -59,7 +57,6 @@ const PaymentReturn = () => {
       if (verifyResponse.data.success) {
         message.success("Payment was successful!");
 
-        // Fetch cart items after successful payment
         const cartResponse = await axios.get(
           `http://localhost:8080/api/v1/cart/${auth.id}`,
           {
@@ -71,15 +68,17 @@ const PaymentReturn = () => {
 
         const cartItems = cartResponse.data.cartItems;
         const totalPrice = cartResponse.data.totalPrice;
+        const orderItems = cartItems.map((item) => ({
+          product: item.product, // Assuming item.product is already a ProductDTO
+          price: item.price,
+          quantity: item.quantity, // Include quantity
+        }));
 
         const createOrderResponse = await axios.post(
           "http://localhost:8080/api/v1/orders",
           {
             userId: auth.id,
-            orderItems: cartItems.map((item) => ({
-              watchId: item.watch.id,
-              price: item.watch.price,
-            })),
+            orderItems: orderItems,
             totalAmount: totalPrice,
           },
           {
@@ -90,12 +89,9 @@ const PaymentReturn = () => {
           }
         );
 
-        // Log the entire response to debug
         console.log("Order creation response: ", createOrderResponse.data);
 
-        // Check if the response has an 'id' property
         if (createOrderResponse.data && createOrderResponse.data.id) {
-          // Clear cart after order creation
           await axios.post(
             `http://localhost:8080/api/v1/cart/clear/${auth.id}`,
             {},
@@ -107,8 +103,8 @@ const PaymentReturn = () => {
             }
           );
 
-          paymentProcessed.current = true; // Set flag after successful processing
-          navigate("/"); // Navigate only once after all actions are completed
+          paymentProcessed.current = true;
+          navigate("/");
         } else {
           message.error(
             "Failed to create order. Response did not indicate success."
@@ -124,15 +120,13 @@ const PaymentReturn = () => {
       message.error("An error occurred while verifying the payment.");
       navigate("/");
     }
-  }, 500); // Debounce with 500ms delay
+  }, 500);
 
   useEffect(() => {
     console.log("PaymentReturn component mounted");
 
     handlePaymentReturn();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array to ensure it only runs once on mount
+  }, []);
 
   return <div>Processing payment...</div>;
 };

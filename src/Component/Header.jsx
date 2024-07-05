@@ -2,6 +2,7 @@ import React from "react";
 import { Menu, Layout, Input, Col, Image, Popconfirm } from "antd";
 import { useNavigate } from "react-router-dom";
 import AvatarDropdown from "./Avatar";
+import { useState } from "react";
 import useAuth from "./Hooks/useAuth"; // Import useAuth hook
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,17 +15,16 @@ import {
   faMessage,
   faMagnifyingGlass,
   faFolder,
+  faUserAlt,
 } from "@fortawesome/free-solid-svg-icons";
 
 const { Header } = Layout;
 const { Search } = Input;
 
-const onSearch = (value) => console.log(value);
-
 const HeaderBar = () => {
   const navigate = useNavigate();
   const { auth, setAuth } = useAuth(); // Use the useAuth hook to get authentication status and setAuth function
-
+  const [searchTerm, setSearchTerm] = useState("");
   const handleLogout = () => {
     setAuth(null);
     navigate("/");
@@ -37,6 +37,11 @@ const HeaderBar = () => {
     if (item.key !== "logout") {
       const path = item.key.toLowerCase();
       navigate(`/${path === "home" ? "" : path}`);
+    }
+  };
+  const handleSearch = (value) => {
+    if (value) {
+      navigate(`/filter?name=${value}`);
     }
   };
 
@@ -65,36 +70,47 @@ const HeaderBar = () => {
           onClick={handleClick}
           style={{ flex: 1, minWidth: 0 }}
         >
-          {auth?.role !== "APPRAISER" && (
+          {auth?.role !== "ADMIN" && (
             <Menu.Item key="home">
               <FontAwesomeIcon size="lg" icon={faHome} />
               Home
             </Menu.Item>
           )}
-          <Menu.Item key="about">
-            <FontAwesomeIcon size="lg" icon={faCircleInfo} />
-            About us
-          </Menu.Item>
+          {auth?.role === "ADMIN" && (
+            <>
+              <Menu.Item key="users">
+                <FontAwesomeIcon size="lg" icon={faUserAlt} />
+                User Management
+              </Menu.Item>
+              <Menu.Item key="revenue">
+                <FontAwesomeIcon size="lg" icon={faUserAlt} />
+                Revenue
+              </Menu.Item>
+              <Menu.Item key="upload">
+                <FontAwesomeIcon size="lg" icon={faUpload} /> Upload Product
+              </Menu.Item>
+              <Menu.Item key="voucher-approve">
+                <FontAwesomeIcon size="lg" icon={faUpload} /> Approve voucher
+              </Menu.Item>
+            </>
+          )}
+
           {auth && auth?.role === "USER" && (
             <>
-              <Menu.Item key="upload">
-                <FontAwesomeIcon size="lg" icon={faUpload} /> Upload post
-              </Menu.Item>
               <Menu.Item key="cart">
-                <FontAwesomeIcon size="lg" icon={faCartShopping} /> Your Cart{" "}
+                <FontAwesomeIcon size="lg" icon={faCartShopping} /> My Cart{" "}
               </Menu.Item>
               <Menu.Item key="orders">
                 <FontAwesomeIcon size="lg" icon={faFolder} /> My Orders{" "}
               </Menu.Item>
             </>
           )}
-          {auth && auth?.role === "APPRAISER" && (
-            <Menu.Item key="unappraised-watches">
-              <FontAwesomeIcon size="lg" icon={faMagnifyingGlass} />{" "}
-              unappraised-watches{" "}
+          {auth && auth?.role === "STAFF" && (
+            <Menu.Item key="create-voucher">
+              <FontAwesomeIcon size="lg" icon={faUpload} /> Create voucher
             </Menu.Item>
           )}
-          {auth && (auth?.role === "APPRAISER" || auth?.role === "USER") && (
+          {auth && (auth?.role === "STAFF" || auth?.role === "USER") && (
             <Menu.Item key="chat">
               <FontAwesomeIcon size="lg" icon={faMessage} /> Chat
             </Menu.Item>
@@ -120,12 +136,14 @@ const HeaderBar = () => {
         </Menu>
       </Col>
       <Col span={9} style={{ display: "flex", alignItems: "center" }}>
-        {auth?.role !== "APPRAISER" && (
+        {auth?.role !== "STAFF" && (
           <Search
-            placeholder="Input watch name here"
-            onSearch={onSearch}
-            enterButton
-            style={{ width: "60%" }}
+            placeholder="Search watches"
+            onSearch={handleSearch}
+            style={{ width: 200, marginRight: 16 }}
+            enterButton={<FontAwesomeIcon icon={faMagnifyingGlass} />}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         )}
         {auth ? (

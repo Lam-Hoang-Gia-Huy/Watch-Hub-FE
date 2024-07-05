@@ -12,15 +12,20 @@ import {
   Row,
   Col,
   Space,
+  Collapse,
 } from "antd";
 
 const { Title, Text } = Typography;
+const { Panel } = Collapse;
 
 const UserDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
+  const [watches, setWatches] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -28,22 +33,33 @@ const UserDetail = () => {
     const day = date.getDate().toString().padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
+
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `https://6656dd4e9f970b3b36c6e348.mockapi.io/Seller/${id}`
+        const userResponse = await axios.get(
+          `http://localhost:8080/api/v1/user/${id}`
         );
-        setUserData(response.data);
+        const watchesResponse = await axios.get(
+          `http://localhost:8080/api/v1/watch/user/${id}`
+        );
+        const feedbackResponse = await axios.get(
+          `http://localhost:8080/api/v1/feedback/user/${id}`
+        );
+        setUserData(userResponse.data);
+        setWatches(
+          watchesResponse.data.filter((watch) => watch.status === true)
+        );
+        setFeedbacks(feedbackResponse.data);
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching user data: ", error);
+        console.error("Error fetching data: ", error);
         setLoading(false);
       }
     };
 
-    fetchUserData();
+    fetchData();
   }, [id]);
 
   if (loading) {
@@ -96,15 +112,12 @@ const UserDetail = () => {
               style={{ textAlign: "left", width: "100%", marginTop: "20px" }}
             >
               <Text>
-                <b>Phone:</b> {userData.phone}
+                <b>Name:</b> {userData.name}
               </Text>
+
               <Text>
                 <b>Member since:</b> {formatDate(userData.createdDate)}
               </Text>
-              <Text>
-                <b>Rating:</b>
-              </Text>
-              <Rating score={userData.rating} />
             </Space>
           </Card>
         </Col>
@@ -115,15 +128,15 @@ const UserDetail = () => {
           style={{
             background: "rgb(213 216 230)",
             borderRadius: "10px",
-            padding: "20px",
           }}
         >
+          <Divider />
           <Title className="formTitle" level={3}>
-            Watches Selling
+            Watches in sell
           </Title>
           <List
             grid={{ gutter: 16, column: 3 }}
-            dataSource={userData.watches}
+            dataSource={watches}
             renderItem={(watch) => (
               <List.Item>
                 <Card
@@ -141,7 +154,7 @@ const UserDetail = () => {
                     >
                       <img
                         alt={watch.name}
-                        src={watch.url[0]}
+                        src={watch.imageUrl[0]}
                         style={{
                           maxHeight: "100%",
                           maxWidth: "100%",
@@ -156,7 +169,7 @@ const UserDetail = () => {
                     title={watch.name}
                     description={
                       <Space direction="vertical" size="small">
-                        <Text>Type: {watch.type}</Text>
+                        <Text>Brand: {watch.brand}</Text>
                         <Text>Price: {watch.price}</Text>
                       </Space>
                     }
@@ -166,6 +179,40 @@ const UserDetail = () => {
             )}
           />
         </Col>
+        <Collapse>
+          <Panel header="Feedback of the user" key="1">
+            <List
+              dataSource={feedbacks}
+              renderItem={(feedback) => (
+                <List.Item>
+                  <Card
+                    style={{
+                      background: "rgb(176 188 206)",
+                      padding: "20px",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    <Card.Meta
+                      avatar={<Avatar src={feedback.avatarUrl} />}
+                      title={feedback.userName}
+                      description={
+                        <Space direction="vertical">
+                          <b>To product: {feedback.watchName}</b>
+                          <b>Comment: </b>
+                          <Text>{feedback.comments}</Text>
+                          <Rating score={feedback.rating} />
+                          <Text type="secondary">
+                            {formatDate(feedback.createdDate)}
+                          </Text>
+                        </Space>
+                      }
+                    />
+                  </Card>
+                </List.Item>
+              )}
+            />
+          </Panel>
+        </Collapse>
       </Row>
     </div>
   );

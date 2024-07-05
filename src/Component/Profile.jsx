@@ -60,16 +60,7 @@ const Profile = () => {
     return <div>Error loading user data</div>;
   }
 
-  const {
-    firstName,
-    lastName,
-    phone,
-    email,
-    avatarUrl,
-    createdDate,
-    rating,
-    gender,
-  } = user;
+  const { name, email, avatarUrl, createdDate } = user;
 
   return (
     <Content
@@ -104,22 +95,13 @@ const Profile = () => {
               User Information
             </Title>
             <Paragraph>
-              <strong>User Name:</strong> {firstName + " " + lastName}
-            </Paragraph>
-            <Paragraph>
-              <strong>Phone:</strong> {phone}
+              <strong>User Name:</strong> {name}
             </Paragraph>
             <Paragraph>
               <strong>Email:</strong> {email}
             </Paragraph>
             <Paragraph>
-              <strong>Gender:</strong> {gender}
-            </Paragraph>
-            <Paragraph>
               <strong>Is a member since:</strong> {formatDate(createdDate)}
-            </Paragraph>
-            <Paragraph>
-              <strong>Rating:</strong> <Rating score={rating} />
             </Paragraph>
             <Button type="primary" onClick={handleEditProfile}>
               Edit Profile

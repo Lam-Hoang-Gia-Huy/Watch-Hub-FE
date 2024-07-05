@@ -1,35 +1,21 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React from "react";
 import { Button, message } from "antd";
+import axios from "axios";
 import useAuth from "./Hooks/useAuth";
 
-const CheckoutButton = () => {
-  const [loading, setLoading] = useState(false);
+const CheckoutButton = ({ totalPrice, voucherCode }) => {
   const { auth } = useAuth();
+  const amount = totalPrice;
+  const orderInfo = `Payment for order at My Shop`;
 
   const handleCheckout = async () => {
-    setLoading(true);
     try {
-      // Fetch the latest cart items from the server
-      const response = await axios.get(
-        `http://localhost:8080/api/v1/cart/${auth.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${auth.accessToken}`,
-          },
-        }
-      );
-
-      const cartItems = response.data.cartItems;
-      const totalPrice = response.data.totalPrice;
-
-      // Proceed to create payment URL
-      const amount = totalPrice;
-      const orderInfo = `Payment for order at My Watch Shop`;
-
-      const paymentResponse = await axios.post(
+      const response = await axios.post(
         "http://localhost:8080/api/v1/payment/create-payment-url",
         {
+          userId: auth.id,
+          totalPrice,
+          voucherCode,
           amount,
           orderInfo,
         },
@@ -41,25 +27,20 @@ const CheckoutButton = () => {
         }
       );
 
-      console.log("Payment URL response: ", paymentResponse.data);
-
-      // Redirect to the payment URL returned by the server
-      if (paymentResponse.data.paymentUrl) {
-        window.location.href = paymentResponse.data.paymentUrl;
+      if (response.status === 200) {
+        window.location.href = response.data.paymentUrl;
       } else {
-        message.error("Failed to create payment URL.");
+        message.error("Checkout failed.");
       }
     } catch (error) {
-      console.error("Error processing checkout: ", error);
-      message.error("An error occurred during the checkout process.");
-    } finally {
-      setLoading(false);
+      console.error("Error during checkout", error);
+      message.error("Checkout failed.");
     }
   };
 
   return (
-    <Button type="primary" onClick={handleCheckout} loading={loading}>
-      Proceed to Checkout
+    <Button type="primary" onClick={handleCheckout}>
+      Checkout
     </Button>
   );
 };

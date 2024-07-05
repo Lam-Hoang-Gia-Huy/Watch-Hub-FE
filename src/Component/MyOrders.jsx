@@ -16,6 +16,12 @@ const MyOrders = () => {
   // const [searchText, setSearchText] = useState("");
 
   const navigate = useNavigate();
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -64,15 +70,15 @@ const MyOrders = () => {
       title: "Total Amount",
       dataIndex: "totalAmount",
       key: "totalAmount",
-      sorter: (a, b) => a.totalAmount - b.totalAmount,
-      render: (amount) => `$${amount.toFixed(2)}`,
+      // sorter: (a, b) => a.totalAmount - b.totalAmount,
+      render: (amount) => `${formatCurrency(amount)}`,
     },
     {
       title: "Created Date",
       dataIndex: "createdDate",
       key: "createdDate",
-      sorter: (a, b) =>
-        moment(a.createdDate).unix() - moment(b.createdDate).unix(),
+      // sorter: (a, b) =>
+      //   moment(a.createdDate).unix() - moment(b.createdDate).unix(),
       render: (date) => moment(date).format("YYYY-MM-DD HH:mm:ss"),
     },
     {
@@ -87,9 +93,11 @@ const MyOrders = () => {
   ];
 
   return (
-    <Card style={{ margin: "20px", padding: "20px" }}>
+    <Card style={{ margin: "20px" }}>
       <Space direction="vertical" style={{ width: "100%" }}>
-        <Title level={3}>My Orders</Title>
+        <Title level={3} className="formTitle">
+          My Orders
+        </Title>
         {/* <Text>View and manage your orders below</Text>
         <Search
           placeholder="Search Orders"

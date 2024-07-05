@@ -7,11 +7,9 @@ import {
   Spin,
   Typography,
   Tag,
-  Form,
-  Input,
+  Row,
+  Col,
   Button,
-  Rate,
-  Collapse,
 } from "antd";
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
@@ -19,21 +17,13 @@ import useAuth from "./Hooks/useAuth";
 import moment from "moment";
 
 const { Title, Text } = Typography;
-const { Panel } = Collapse;
 
 const OrderDetail = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [feedbacks, setFeedbacks] = useState({});
   const { auth } = useAuth();
-
-  const [feedback, setFeedback] = useState({
-    comments: "",
-    rating: 0,
-    targetId: null,
-    targetType: "user",
-  });
-  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -47,7 +37,9 @@ const OrderDetail = () => {
             },
           }
         );
-        setOrder(response.data);
+        const orderData = response.data;
+        setOrder(orderData);
+        await fetchFeedbacks(orderData.orderItems);
       } catch (error) {
         console.error("Failed to fetch order", error);
         message.error("Failed to fetch order");
@@ -56,54 +48,28 @@ const OrderDetail = () => {
       }
     };
 
+    const fetchFeedbacks = async (orderItems) => {
+      const feedbackData = {};
+      for (const item of orderItems) {
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/api/v1/feedback/${item.id}`, // Adjust URL
+            {
+              headers: {
+                Authorization: `Bearer ${auth.accessToken}`,
+              },
+            }
+          );
+          feedbackData[item.id] = response.data;
+        } catch (error) {
+          feedbackData[item.id] = null;
+        }
+      }
+      setFeedbacks(feedbackData);
+    };
+
     fetchOrder();
   }, [orderId, auth]);
-
-  const handleFeedbackSubmit = async (watchId, sellerId, appraisalId) => {
-    setFeedbackLoading(true);
-    try {
-      const appraisalResponse = await axios.get(
-        `http://localhost:8080/api/v1/appraisal/${appraisalId}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${auth.accessToken}`,
-          },
-        }
-      );
-      await axios.post(
-        `http://localhost:8080/api/v1/feedback`,
-        {
-          buyerId: auth.id,
-          comments: feedback.comments,
-          rating: feedback.rating,
-          watchId: watchId,
-          userId:
-            feedback.targetType === "seller"
-              ? sellerId
-              : appraisalResponse.data.appraiserId,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${auth.accessToken}`,
-          },
-        }
-      );
-      message.success("Feedback submitted successfully");
-      setFeedback({
-        comments: "",
-        rating: 0,
-        targetId: null,
-        targetType: "user",
-      });
-    } catch (error) {
-      console.error("Failed to submit feedback", error);
-      message.error("Failed to submit feedback");
-    } finally {
-      setFeedbackLoading(false);
-    }
-  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -151,101 +117,52 @@ const OrderDetail = () => {
           bordered
           dataSource={order.orderItems}
           renderItem={(item) => (
-            <List.Item>
-              <List.Item.Meta
-                title={
-                  <Link to={`/watch/${item.watch.id}`}>
-                    <Text strong>{item.watch.name}</Text>
-                  </Link>
-                }
-                description={
-                  <>
-                    <p>
-                      <strong>Brand:</strong> {item.watch.brand}
-                    </p>
-                    <p>
-                      <strong>Description:</strong> {item.watch.description}
-                    </p>
-                    <p>
-                      <strong>Price:</strong> {formatCurrency(item.watch.price)}
-                    </p>
-                    <Collapse>
-                      <Panel
-                        header="Click to leave feedback"
-                        key={item.watch.appraisalId.toString()}
-                      >
-                        <Form
-                          onFinish={() =>
-                            handleFeedbackSubmit(
-                              item.watch.id,
-                              item.watch.sellerId,
-                              item.watch.appraisalId
-                            )
-                          }
-                        >
-                          <Form.Item label="Comments">
-                            <Input.TextArea
-                              rows={4}
-                              value={feedback.comments}
-                              onChange={(e) =>
-                                setFeedback({
-                                  ...feedback,
-                                  comments: e.target.value,
-                                })
-                              }
-                            />
-                          </Form.Item>
-                          <Form.Item label="Rating">
-                            <Rate
-                              value={feedback.rating}
-                              onChange={(value) =>
-                                setFeedback({ ...feedback, rating: value })
-                              }
-                            />
-                          </Form.Item>
-                          <Form.Item label="Feedback Type">
-                            <select
-                              value={feedback.targetType}
-                              onChange={(e) =>
-                                setFeedback({
-                                  ...feedback,
-                                  targetType: e.target.value,
-                                })
-                              }
-                            >
-                              <option value="seller">Seller</option>
-
-                              <option value="appraiser">Appraiser</option>
-                            </select>
-                          </Form.Item>
-                          <Form.Item>
-                            <Button
-                              type="primary"
-                              htmlType="submit"
-                              loading={feedbackLoading}
-                            >
-                              Submit Feedback
-                            </Button>
-                          </Form.Item>
-                        </Form>
-                      </Panel>
-                    </Collapse>
-                  </>
-                }
-              />
-              <div>
-                {item.watch.imageUrl && item.watch.imageUrl.length > 0 && (
-                  <img
-                    src={item.watch.imageUrl[0]}
-                    alt={item.watch.name}
-                    style={{
-                      maxWidth: "100px",
-                      marginLeft: "20px",
-                      borderRadius: "8px",
-                    }}
-                  />
-                )}
-              </div>
+            <List.Item style={{ padding: "20px" }}>
+              <Row gutter={[16, 16]} style={{ width: "100%" }}>
+                <Col xs={24} sm={24} md={6} lg={4} xl={4}>
+                  {item.product.imageUrl &&
+                    item.product.imageUrl.length > 0 && (
+                      <img
+                        src={item.product.imageUrl[0]}
+                        alt={item.product.name}
+                        style={{ width: "100%", borderRadius: "8px" }}
+                      />
+                    )}
+                </Col>
+                <Col xs={24} sm={24} md={18} lg={20} xl={20}>
+                  <Descriptions column={1} bordered>
+                    <Descriptions.Item label="Name">
+                      <Link to={`/product/${item.product.id}`}>
+                        <Text strong>{item.product.name}</Text>
+                      </Link>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Category">
+                      {item.product.category}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Description">
+                      {item.product.description}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Price">
+                      {formatCurrency(item.product.price)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Quantity">
+                      {item.quantity}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Total">
+                      {formatCurrency(item.product.price * item.quantity)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Actions">
+                      <Link to={`/feedback/${item.product.id}/${item.id}`}>
+                        <Button type="primary">
+                          {feedbacks[item.id]
+                            ? "Edit Feedback"
+                            : "Leave Feedback"}
+                        </Button>
+                      </Link>
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Col>
+              </Row>
             </List.Item>
           )}
         />

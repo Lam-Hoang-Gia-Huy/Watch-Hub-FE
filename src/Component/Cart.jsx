@@ -1,15 +1,28 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { List, Button, Typography, Row, Col, theme } from "antd";
+import {
+  List,
+  Button,
+  Typography,
+  Row,
+  Col,
+  theme,
+  InputNumber,
+  Select,
+  message,
+} from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
-import CheckoutButton from "./CheckOutButton";
 import useAuth from "./Hooks/useAuth";
+import CheckoutButton from "./CheckOutButton";
 
 const { Text, Title } = Typography;
+const { Option } = Select;
 
 const Cart = () => {
   const [cart, setCart] = useState({ cartItems: [], totalPrice: 0 });
+  const [voucherCode, setVoucherCode] = useState("");
+  const [vouchers, setVouchers] = useState([]);
   const { auth } = useAuth();
 
   useEffect(() => {
@@ -20,7 +33,7 @@ const Cart = () => {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${auth.accessToken}`, // Include authentication token in request headers
+              Authorization: `Bearer ${auth.accessToken}`,
             },
           }
         );
@@ -33,7 +46,28 @@ const Cart = () => {
         console.error("Error fetching cart data", error);
       }
     };
+
+    const fetchVouchers = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/v1/voucher`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
+        );
+        if (response.status === 200) {
+          setVouchers(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching vouchers", error);
+      }
+    };
+
     fetchCart();
+    fetchVouchers();
   }, [auth.id, auth.accessToken]);
 
   const handleRemoveFromCart = async (cartItemId) => {
@@ -43,7 +77,7 @@ const Cart = () => {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${auth.accessToken}`, // Include authentication token in request headers
+            Authorization: `Bearer ${auth.accessToken}`,
           },
         }
       );
@@ -52,112 +86,154 @@ const Cart = () => {
         cartItems: prevCart.cartItems.filter((item) => item.id !== cartItemId),
         totalPrice:
           prevCart.totalPrice -
-          prevCart.cartItems.find((item) => item.id === cartItemId).watch.price,
+          prevCart.cartItems.find((item) => item.id === cartItemId).product
+            .price *
+            prevCart.cartItems.find((item) => item.id === cartItemId).quantity,
       }));
     } catch (error) {
       console.error("Error removing item from cart", error);
     }
   };
 
+  const handleQuantityChange = async (cartItemId, newQuantity) => {
+    try {
+      await axios.put(
+        `http://localhost:8080/api/v1/cart/${auth.id}/${cartItemId}`,
+        { quantity: newQuantity },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
+      );
+      setCart((prevCart) => {
+        const updatedCartItems = prevCart.cartItems.map((item) => {
+          if (item.id === cartItemId) {
+            return { ...item, quantity: newQuantity };
+          }
+          return item;
+        });
+        const updatedTotalPrice = updatedCartItems.reduce(
+          (total, item) => total + item.product.price * item.quantity,
+          0
+        );
+        return {
+          ...prevCart,
+          cartItems: updatedCartItems,
+          totalPrice: updatedTotalPrice,
+        };
+      });
+    } catch (error) {
+      console.error("Error updating item quantity in cart", error);
+    }
+  };
+
+  const handleApplyVoucher = async () => {
+    try {
+      const response = await axios.put(
+        `http://localhost:8080/api/v1/cart/${auth.id}/apply-voucher`,
+        null,
+        {
+          params: { voucherCode },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setCart(response.data);
+        message.success("Voucher applied successfully!");
+      } else {
+        message.error("Failed to apply voucher.");
+      }
+    } catch (error) {
+      console.error("Error applying voucher", error);
+      message.error("Invalid voucher code.");
+    }
+  };
+
   const {
-    token: { colorBgContainer, borderRadiusLG, colorPrimary, colorError },
+    token: {
+      colorBgContainer,
+      borderRadiusLG,
+      colorPrimary,
+      colorText,
+      colorTextSecondary,
+      fontSize,
+      fontSizeLG,
+      fontSizeXL,
+      fontSizeHeading,
+      lineHeight,
+    },
   } = theme.useToken();
 
   return (
     <div
       style={{
-        padding: "20px 20px",
-        flexGrow: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        padding: 24,
+        backgroundColor: colorBgContainer,
+        borderRadius: borderRadiusLG,
+        color: colorText,
       }}
     >
-      <div
-        style={{
-          padding: 24,
-          flexGrow: 1,
-          background: colorBgContainer,
-          borderRadius: borderRadiusLG,
-          maxWidth: "600px",
-          width: "100%",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <Title
-          className="formTitle"
-          type="success"
-          level={2}
-          style={{ textAlign: "center" }}
-        >
-          YOUR CART <FontAwesomeIcon size="lg" icon={faCartShopping} />
-        </Title>
-        <List
-          split="true"
-          style={{
-            backgroundColor: "#f9f9f9",
-            borderRadius: "8px",
-            padding: "10px",
-          }}
-          itemLayout="horizontal"
-          dataSource={cart.cartItems}
-          renderItem={(cartItem) => (
-            <List.Item
-              style={{
-                padding: "10px",
-                borderBottom: "1px solid #e8e8e8",
-                transition: "background-color 0.3s",
-              }}
-              actions={[
-                <Button
-                  type="link"
-                  onClick={() => handleRemoveFromCart(cartItem.id)}
-                  style={{ color: colorError }}
-                >
-                  Remove
-                </Button>,
-              ]}
+      <Title level={2} style={{ color: colorPrimary }}>
+        <FontAwesomeIcon icon={faCartShopping} /> Your Shopping Cart
+      </Title>
+      <List
+        itemLayout="horizontal"
+        dataSource={cart.cartItems}
+        renderItem={(item) => (
+          <List.Item
+            actions={[
+              <Button
+                type="primary"
+                danger
+                onClick={() => handleRemoveFromCart(item.id)}
+              >
+                Remove
+              </Button>,
+            ]}
+          >
+            <List.Item.Meta
+              title={item.product.name}
+              description={`Price: ${item.product.price}đ | Quantity: ${item.quantity}`}
+            />
+            <InputNumber
+              min={1}
+              defaultValue={item.quantity}
+              onChange={(value) => handleQuantityChange(item.id, value)}
+            />
+          </List.Item>
+        )}
+      />
+      <div style={{ marginTop: 16 }}>
+        <Row gutter={[16, 16]}>
+          <Col span={24}>
+            <Title level={3}>Total: {cart.totalPrice}đ</Title>
+          </Col>
+          <Col span={24}>
+            <Select
+              placeholder="Select a voucher"
+              style={{ width: "200px", marginRight: "8px" }}
+              onChange={setVoucherCode}
             >
-              <List.Item.Meta
-                avatar={
-                  <img
-                    src={cartItem.watch.imageUrl[0]}
-                    alt={cartItem.watch.name}
-                    style={{ width: "70px", borderRadius: "8px" }}
-                  />
-                }
-                title={"Title: " + cartItem.watch.name}
-                description={
-                  <div>
-                    <Text style={{ color: "black" }}>
-                      <b>Brand: </b> {cartItem.watch.brand}
-                      <br></br>
-                    </Text>
-                    <Text style={{ color: "black" }}>
-                      <b>Price: </b> {cartItem.watch.price?.toLocaleString()} đ
-                      <br></br>
-                    </Text>
-                  </div>
-                }
-              />
-            </List.Item>
-          )}
-        />
-        <Row style={{ marginTop: "20px" }}>
-          <Col span={12}>
-            <Text strong style={{ fontSize: "16px" }}>
-              Total:
-            </Text>
+              {vouchers.map((voucher) => (
+                <Option key={voucher.code} value={voucher.code}>
+                  {voucher.code} - {voucher.discountValue}đ
+                </Option>
+              ))}
+            </Select>
+            <Button type="primary" onClick={handleApplyVoucher}>
+              Apply Voucher
+            </Button>
           </Col>
-          <Col span={12} style={{ textAlign: "right" }}>
-            <Text strong style={{ fontSize: "16px" }}>
-              {cart.totalPrice?.toLocaleString()} đ
-            </Text>
-          </Col>
-        </Row>
-        <Row style={{ marginTop: "20px" }} justify="center">
-          <Col>
-            <CheckoutButton />
+          <Col span={24}>
+            <CheckoutButton
+              totalPrice={cart.totalPrice}
+              voucherCode={voucherCode}
+            />
           </Col>
         </Row>
       </div>

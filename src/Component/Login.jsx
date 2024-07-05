@@ -47,13 +47,9 @@ const LoginPage = () => {
       // Store user information and token in the frontend
       setAuth({
         id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        usertName: user.userName,
         email: user.email,
-        phone: user.phone,
-        gender: user.gender,
         avatarUrl: user.avatarUrl,
-        address: user.address,
         role: user.role,
         createdDate: user.createdDate,
         accessToken: token,
@@ -137,15 +133,6 @@ const LoginPage = () => {
             >
               <Input.Password />
             </Form.Item>
-
-            <Form.Item
-              name="remember"
-              valuePropName="checked"
-              wrapperCol={{ offset: 8, span: 16 }}
-            >
-              <Checkbox>Remember me</Checkbox>
-            </Form.Item>
-
             <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
               <Button type="primary" htmlType="submit">
                 Log in

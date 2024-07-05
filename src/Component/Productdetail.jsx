@@ -24,12 +24,9 @@ const thumbnailStyle = {
   objectFit: "cover",
 };
 
-const WatchDetail = () => {
+const ProductDetail = () => {
   let { id } = useParams();
-  const [watchData, setWatchData] = useState(null);
-  const [sellerName, setSellerName] = useState(null);
-  const [appraiserName, setAppraiserName] = useState(null);
-  const [appraisalData, setAppraisalData] = useState(null);
+  const [productData, setProductData] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
   const carouselRef = useRef(null);
@@ -41,40 +38,17 @@ const WatchDetail = () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/v1/watch/${id}`
+          `http://localhost:8080/api/v1/product/${id}`
         );
-        setWatchData(response.data);
-        // Check if appraisalId exists and fetch appraisal data
-        if (response.data.appraisalId) {
-          const appraisalResponse = await axios.get(
-            `http://localhost:8080/api/v1/appraisal/${response.data.appraisalId}`
-          );
-          // Update state with appraisal data
-          setAppraisalData(appraisalResponse.data);
-
-          const appraiserResponse = await axios.get(
-            `http://localhost:8080/api/v1/user/${appraisalResponse.data.appraiserId}`
-          );
-          setAppraiserName(
-            appraiserResponse.data.firstName +
-              " " +
-              appraiserResponse.data.lastName
-          );
-        }
-        const sellerResponse = await axios.get(
-          `http://localhost:8080/api/v1/user/${response.data.sellerId}`
-        );
-        setSellerName(
-          sellerResponse.data.firstName + " " + sellerResponse.data.lastName
-        );
+        setProductData(response.data);
       } catch (error) {
-        console.error("Error fetching watch details: ", error);
+        console.error("Error fetching product details: ", error);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, [id, watchData?.appraisalId]); // Include watchData.appraisalId in the dependency array
+  }, [id, productData?.appraisalId]);
 
   const handleThumbnailClick = (index) => {
     setCurrentSlide(index);
@@ -97,14 +71,10 @@ const WatchDetail = () => {
 
   const addToCart = async () => {
     if (auth) {
-      const isCurrentUserSeller = auth.id === watchData.sellerId;
-      if (isCurrentUserSeller) {
-        return message.info("Cannot add your own item!");
-      }
       try {
         const cartItem = {
-          watch: {
-            id: watchData.id, // Ensure only the watch ID is sent
+          product: {
+            id: productData.id,
           },
         };
         const response = await axios.post(
@@ -135,6 +105,8 @@ const WatchDetail = () => {
     return <Loading />;
   }
 
+  const showAddToCartButton = productData.status === true;
+
   return (
     <Content
       style={{
@@ -152,14 +124,14 @@ const WatchDetail = () => {
             arrows
             initialSlide={currentSlide}
           >
-            {watchData.imageUrl.map((imageUrl) => (
+            {productData.imageUrl.map((imageUrl) => (
               <div key={imageUrl}>
                 <PhotoProvider>
                   <PhotoView src={imageUrl}>
                     <img
                       key={imageUrl}
                       src={imageUrl}
-                      alt={watchData.name}
+                      alt={productData.name}
                       className="contentStyle"
                     />
                   </PhotoView>
@@ -168,7 +140,7 @@ const WatchDetail = () => {
             ))}
           </Carousel>
           <div className="thumbnails">
-            {watchData.imageUrl.map((imageUrl, index) => (
+            {productData.imageUrl.map((imageUrl, index) => (
               <img
                 key={index}
                 src={imageUrl}
@@ -184,107 +156,51 @@ const WatchDetail = () => {
         </Col>
 
         <Col style={{ marginLeft: "20px" }} span={11}>
-          <h1>{watchData.name}</h1>
+          <h1>{productData.name}</h1>
           <div style={{ marginBottom: "10px" }}>
             <Text strong style={{ fontSize: "16px" }}>
               Price:{" "}
             </Text>
             <Text style={{ fontSize: "16px", color: "#ff4d4f" }}>
-              {watchData.price?.toLocaleString()} đ
+              {productData.price?.toLocaleString()} đ
             </Text>
           </div>
           <div style={{ marginBottom: "10px" }}>
             <Text strong style={{ fontSize: "16px" }}>
-              Brand:{" "}
+              Category:{" "}
             </Text>
-            <Text style={{ fontSize: "16px" }}>{watchData.brand}</Text>
+            <Text style={{ fontSize: "16px" }}>{productData.category}</Text>
           </div>
           <div style={{ marginBottom: "10px" }}>
             <Text strong style={{ fontSize: "16px" }}>
-              Posted:{" "}
+              Quantity:{" "}
             </Text>
             <Text style={{ fontSize: "16px" }}>
-              {getTimeSincePost(watchData.postDate)}
+              {productData.stockQuantity}
             </Text>
-          </div>
-          <div style={{ marginBottom: "10px" }}>
-            <Text style={{ fontSize: "16px" }}>
-              Seller:{" "}
-              <Link to={`/user/${watchData.sellerId}`}>{sellerName}</Link>
-            </Text>
-            {" ("}
-            <Rating score={watchData?.seller?.rating}></Rating>
-            {")"}
           </div>
           <div style={{ marginBottom: "10px" }}>
             <Text strong style={{ fontSize: "16px" }}>
-              Appraised by:{" "}
+              Posted since:{" "}
             </Text>
-            <Text style={{ fontSize: "16px" }}>{appraiserName}</Text>
+            <Text style={{ fontSize: "16px" }}>
+              {getTimeSincePost(productData.createdDate)}
+            </Text>
           </div>
-          <Button type="primary" onClick={addToCart}>
-            Add to Cart <FontAwesomeIcon size="lg" icon={faCartShopping} />
-          </Button>
+
+          {showAddToCartButton && (
+            <Button type="primary" onClick={addToCart}>
+              Add to Cart <FontAwesomeIcon size="lg" icon={faCartShopping} />
+            </Button>
+          )}
         </Col>
       </Row>
       <div className="watch-description">
         <h2>Description</h2>
-        {watchData.description}
-      </div>
-      <div className="watch-description">
-        <h2>Appraisal report</h2>
-        <div className="appraisal">
-          <Row className="row">
-            <Col span={8}>
-              <span className="attribute">Price</span>
-              <br></br>
-              <span>{appraisalData.value?.toLocaleString() + "đ"}</span>
-            </Col>
-
-            <Col span={8}>
-              <span className="attribute">Material: </span> <br></br>
-              <span>{appraisalData.material}</span>
-            </Col>
-          </Row>
-          <Col span={8}>
-            <span className="attribute">Buckle</span>
-            <br></br>
-            <span>{appraisalData.buckle}</span>
-          </Col>
-          <Row className="row">
-            <Col span={8}>
-              <span className="attribute">Thickness </span> <br></br>
-              <span>{appraisalData.thickness}</span>
-            </Col>
-            <Col span={8}>
-              <span className="attribute">Dial </span> <br></br>
-              <span>{appraisalData.dial}</span>
-            </Col>
-            <Col span={8}>
-              <span className="attribute">Movement </span> <br></br>
-              <span>{appraisalData.movement}</span>
-            </Col>
-          </Row>
-          <Row className="row">
-            <Col span={8}>
-              <span className="attribute">Crystal </span> <br></br>
-              <span>{appraisalData.crystal}</span>
-            </Col>
-            <Col span={8}>
-              <span className="attribute">bracket </span> <br></br>
-              <span>{appraisalData.bracket}</span>
-            </Col>
-          </Row>
-          <Row className="row">
-            <Col span={24}>
-              <span className="attribute">Comment </span> <br></br>
-              <span>{appraisalData.comments}</span>
-            </Col>
-          </Row>
-        </div>
+        {productData.description}
       </div>
     </Content>
   );
 };
 
-export default WatchDetail;
+export default ProductDetail;

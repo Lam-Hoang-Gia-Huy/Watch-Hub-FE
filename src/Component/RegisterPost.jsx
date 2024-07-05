@@ -10,6 +10,7 @@ import {
   Form,
   Input,
   Select,
+  InputNumber,
 } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload } from "@fortawesome/free-solid-svg-icons";
@@ -35,14 +36,14 @@ const RegisterPost = () => {
     setSelectedFiles(fileList.map((file) => file.originFileObj));
   };
 
-  const handleUpload = async (watchId) => {
+  const handleUpload = async (productId) => {
     const formData = new FormData();
     selectedFiles.forEach((file) => {
       formData.append("imageFiles", file);
     });
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/watch/${watchId}/images`,
+        `http://localhost:8080/api/v1/product/${productId}/images`,
         {
           method: "POST",
           body: formData,
@@ -68,37 +69,34 @@ const RegisterPost = () => {
       // Include user ID in the request body
       const body = { ...values, userId: auth.id };
 
-      const response = await fetch(
-        "http://localhost:8080/api/v1/watch/user/" + auth.id,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${auth.accessToken}`, // Include authentication token in request headers
-          },
-          body: JSON.stringify(body),
-        }
-      );
+      const response = await fetch(`http://localhost:8080/api/v1/product`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.accessToken}`, // Include authentication token in request headers
+        },
+        body: JSON.stringify(body),
+      });
       if (response.ok) {
         const data = await response.json();
-        message.success("Watch details submitted successfully!");
+        message.success("Product details submitted successfully!");
         if (selectedFiles.length > 0) {
           await handleUpload(data.id);
         }
       } else {
-        message.error("Failed to submit watch details.");
+        message.error("Failed to submit product details.");
       }
     } catch (error) {
       message.error("Submission error: " + error);
     }
   };
-  const watchTypes = [
-    { name: "Mechanical" },
-    { name: "Automatic" },
-    { name: "Hybrid" },
-    { name: "Chronograph" },
-    { name: "Classic" },
-    { name: "Luxury" },
+
+  const brands = [
+    "Sweetened",
+    "Powdered milk",
+    "Condensed milk",
+    "Fresh milk",
+    "UHT Milk",
   ];
 
   return (
@@ -119,7 +117,7 @@ const RegisterPost = () => {
         }}
       >
         <Title mark className="formTitle" color="#c57071" level={2}>
-          UPLOAD WATCH FORM <FontAwesomeIcon size="lg" icon={faUpload} />
+          UPLOAD PRODUCT FORM <FontAwesomeIcon size="lg" icon={faUpload} />
         </Title>
         <Row gutter={[16, 16]}>
           <Col span={8}>
@@ -130,7 +128,7 @@ const RegisterPost = () => {
           </Col>
           <Col style={{ borderLeft: "solid 1px" }} span={16}>
             <Title className="formTitle" type="success" level={2}>
-              Watch's information
+              Product's information
             </Title>
             <Form
               form={form}
@@ -151,35 +149,39 @@ const RegisterPost = () => {
                 <Input placeholder="Enter name here" />
               </Form.Item>
               <Form.Item
-                name="brand"
-                label="Brand"
+                name="category"
+                label="Category"
                 rules={[
                   {
                     required: true,
-                    message: "Please enter the brand",
+                    message: "Please select a brand",
                   },
                 ]}
               >
-                <Input placeholder="Enter brand here" />
-              </Form.Item>
-              {/* <Form.Item
-                name="watchtype"
-                label="Watch type"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select a watch type",
-                  },
-                ]}
-              >
-                <Select placeholder="Choose watch type here">
-                  {watchTypes.map((type, index) => (
-                    <Option key={index} value={type.name}>
-                      {type.name}
+                <Select placeholder="Choose category here">
+                  {brands.map((brand, index) => (
+                    <Option key={index} value={brand}>
+                      {brand}
                     </Option>
                   ))}
                 </Select>
-              </Form.Item> */}
+              </Form.Item>
+              <Form.Item
+                label="Price"
+                name="price"
+                rules={[{ required: true, message: "Please input the price!" }]}
+              >
+                <InputNumber min={0} style={{ width: "100%" }} />
+              </Form.Item>
+              <Form.Item
+                label="Quantity"
+                name="stockQuantity"
+                rules={[
+                  { required: true, message: "Please input the number!" },
+                ]}
+              >
+                <InputNumber min={0} style={{ width: "100%" }} />
+              </Form.Item>
               <Form.Item
                 name="description"
                 label="Description"

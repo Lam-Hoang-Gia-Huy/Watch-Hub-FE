@@ -2,7 +2,6 @@ import React from "react";
 import { Row, Col, Card } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
-
 import {
   faClock,
   faStopwatch,
@@ -13,20 +12,20 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const watchTypes = [
-  { name: "Rolex", icon: faGear },
-  { name: "Omega", icon: faTachometerAlt },
-  { name: "Seiko", icon: faClock },
-  { name: "Cartier", icon: faCompass },
-  { name: "IWC", icon: faStopwatch },
-  { name: "Zenith", icon: faStar },
+  { name: "Sweetened", icon: faGear },
+  { name: "Powdered milk", icon: faTachometerAlt },
+  { name: "Condensed milk", icon: faClock },
+  { name: "Fresh milk", icon: faCompass },
+  { name: "UHT Milk", icon: faStopwatch },
 ];
 
 const WatchTypeList = () => {
   const navigate = useNavigate();
 
   const handleTypeClick = (type) => {
-    navigate(`/filter/${type.name}`);
+    navigate(`/filter?category=${type.name}`);
   };
+
   return (
     <Row gutter={[16, 16]} justify="center" style={{ marginBottom: "24px" }}>
       {watchTypes.map((type) => (
@@ -39,6 +38,7 @@ const WatchTypeList = () => {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
+              background: "#e1a9a9",
               textAlign: "center",
               height: "100px",
             }}

@@ -10,13 +10,11 @@ const Register = () => {
   const navigate = useNavigate();
   const onFinish = async (values) => {
     const payload = {
-      firstname: values.firstname,
-      lastname: values.lastname,
+      userName: values.userName,
       email: values.email,
       password: values.password,
-      phone: values.phone,
-      gender: values.gender,
-      address: values.address,
+      avatarUrl:
+        "https://res.cloudinary.com/dfeuv0ynf/image/upload/v1718868313/ytqqm8d9pavipqjjyfwi.jpg",
     };
 
     try {
@@ -37,23 +35,15 @@ const Register = () => {
             <h1 className="formTitle">REGISTER FORM</h1>
             <Form name="register" onFinish={onFinish}>
               <Form.Item
-                label="First Name"
-                name="firstname"
+                label="Username"
+                name="userName"
                 rules={[
-                  { required: true, message: "Please input your first name!" },
+                  { required: true, message: "Please input your username!" },
                 ]}
               >
                 <Input />
               </Form.Item>
-              <Form.Item
-                label="Last Name"
-                name="lastname"
-                rules={[
-                  { required: true, message: "Please input your last name!" },
-                ]}
-              >
-                <Input />
-              </Form.Item>
+
               <Form.Item
                 name="email"
                 label="E-mail"
@@ -106,37 +96,6 @@ const Register = () => {
                 ]}
               >
                 <Input.Password />
-              </Form.Item>
-              <Form.Item
-                label="Phone"
-                name="phone"
-                rules={[
-                  { required: true, message: "Please input your phone!" },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="Gender"
-                name="gender"
-                rules={[
-                  { required: true, message: "Please select your gender!" },
-                ]}
-              >
-                <Select placeholder="Select your gender">
-                  <Option value="Male">Male</Option>
-                  <Option value="Female">Female</Option>
-                  <Option value="Other">Other</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item
-                label="Address"
-                name="address"
-                rules={[
-                  { required: true, message: "Please input your address!" },
-                ]}
-              >
-                <Input />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit">

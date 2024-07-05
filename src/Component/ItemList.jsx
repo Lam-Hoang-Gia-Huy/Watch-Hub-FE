@@ -14,13 +14,15 @@ const ItemList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchWatches = async () => {
+    const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/v1/watch");
-        const appraisedWatches = response.data.filter(
-          (watch) => watch.appraisalId !== null && watch.status == true
+        const response = await axios.get(
+          "http://localhost:8080/api/v1/product"
         );
-        setItems(appraisedWatches);
+        const filteredProduct = response.data.filter(
+          (product) => product.status == true
+        );
+        setItems(filteredProduct);
         setLoading(false);
       } catch (err) {
         setError(err);
@@ -28,7 +30,7 @@ const ItemList = () => {
       }
     };
 
-    fetchWatches();
+    fetchProducts();
   }, []);
 
   const getTimeSincePost = (postDate) => {
@@ -46,7 +48,7 @@ const ItemList = () => {
   };
 
   const handleItemClick = (id) => {
-    navigate(`/watch/${id}`);
+    navigate(`/product/${id}`);
   };
 
   if (loading) {
@@ -73,6 +75,7 @@ const ItemList = () => {
             hoverable
             title={"Title: " + item.name}
             bordered={true}
+            style={{ background: "#f2e5e5" }}
             onClick={() => handleItemClick(item.id)}
             cover={
               <img
@@ -88,11 +91,12 @@ const ItemList = () => {
               </span>
             </div>
             <div className="item-details">
-              <b>Brand: {item.brand} </b>
+              <span className="item-brand">{item.category}</span>
             </div>
+
             <div className="item-details">
               <span className="item-post-date">
-                {getTimeSincePost(item?.postDate)}
+                {getTimeSincePost(item?.createdDate)}
               </span>
             </div>
           </Card>
