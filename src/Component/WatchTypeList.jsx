@@ -3,20 +3,19 @@ import { Row, Col, Card } from "antd";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 import {
-  faClock,
-  faStopwatch,
-  faTachometerAlt,
-  faCompass,
-  faGear,
-  faStar,
+  faChild,
+  faCarriageBaby,
+  faHandsHoldingChild,
+  faBaby,
+  faChildReaching,
 } from "@fortawesome/free-solid-svg-icons";
 
 const watchTypes = [
-  { name: "Sweetened", icon: faGear },
-  { name: "Powdered milk", icon: faTachometerAlt },
-  { name: "Condensed milk", icon: faClock },
-  { name: "Fresh milk", icon: faCompass },
-  { name: "UHT Milk", icon: faStopwatch },
+  { name: "Sweetened", icon: faCarriageBaby },
+  { name: "Powdered milk", icon: faHandsHoldingChild },
+  { name: "Condensed milk", icon: faChild },
+  { name: "Fresh milk", icon: faBaby },
+  { name: "UHT Milk", icon: faChildReaching },
 ];
 
 const WatchTypeList = () => {
