@@ -22,7 +22,7 @@ const UserDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
-  const [watches, setWatches] = useState([]);
+  const [products, setProducts] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,15 +41,15 @@ const UserDetail = () => {
         const userResponse = await axios.get(
           `http://localhost:8080/api/v1/user/${id}`
         );
-        const watchesResponse = await axios.get(
-          `http://localhost:8080/api/v1/watch/user/${id}`
+        const productsResponse = await axios.get(
+          `http://localhost:8080/api/v1/product/user/${id}`
         );
         const feedbackResponse = await axios.get(
           `http://localhost:8080/api/v1/feedback/user/${id}`
         );
         setUserData(userResponse.data);
-        setWatches(
-          watchesResponse.data.filter((watch) => watch.status === true)
+        setProducts(
+          productsResponse.data.filter((product) => product.status === true)
         );
         setFeedbacks(feedbackResponse.data);
         setLoading(false);
@@ -81,8 +81,8 @@ const UserDetail = () => {
     return <div>User not found</div>;
   }
 
-  const handleWatchClick = (watchId) => {
-    navigate(`/watch/${watchId}`);
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
   };
 
   return (
@@ -132,11 +132,11 @@ const UserDetail = () => {
         >
           <Divider />
           <Title className="formTitle" level={3}>
-            Watches in sell
+            Products in sell
           </Title>
           <List
             grid={{ gutter: 16, column: 3 }}
-            dataSource={watches}
+            dataSource={products}
             renderItem={(watch) => (
               <List.Item>
                 <Card
@@ -163,7 +163,7 @@ const UserDetail = () => {
                       />
                     </div>
                   }
-                  onClick={() => handleWatchClick(watch.id)}
+                  onClick={() => handleProductClick(watch.id)}
                 >
                   <Card.Meta
                     title={watch.name}

@@ -200,7 +200,7 @@ const RegisterPost = () => {
                   htmlType="submit"
                   style={{ marginTop: 16 }}
                 >
-                  Submit Watch Details
+                  Submit Product Details
                 </Button>
               </Form.Item>
             </Form>

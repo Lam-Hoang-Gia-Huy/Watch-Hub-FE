@@ -81,15 +81,21 @@ const Cart = () => {
           },
         }
       );
-      setCart((prevCart) => ({
-        ...prevCart,
-        cartItems: prevCart.cartItems.filter((item) => item.id !== cartItemId),
-        totalPrice:
-          prevCart.totalPrice -
-          prevCart.cartItems.find((item) => item.id === cartItemId).product
-            .price *
-            prevCart.cartItems.find((item) => item.id === cartItemId).quantity,
-      }));
+
+      // Fetch updated cart data
+      const response = await axios.get(
+        `http://localhost:8080/api/v1/cart/${auth.id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setCart(response.data);
+      }
     } catch (error) {
       console.error("Error removing item from cart", error);
     }
@@ -142,6 +148,7 @@ const Cart = () => {
           },
         }
       );
+
       if (response.status === 200) {
         setCart(response.data);
         message.success("Voucher applied successfully!");

@@ -11,7 +11,7 @@ import {
   faStar,
 } from "@fortawesome/free-solid-svg-icons";
 
-const watchTypes = [
+const productTypes = [
   { name: "Sweetened", icon: faGear },
   { name: "Powdered milk", icon: faTachometerAlt },
   { name: "Condensed milk", icon: faClock },
@@ -19,7 +19,7 @@ const watchTypes = [
   { name: "UHT Milk", icon: faStopwatch },
 ];
 
-const WatchTypeList = () => {
+const ProductTypeList = () => {
   const navigate = useNavigate();
 
   const handleTypeClick = (type) => {
@@ -28,7 +28,7 @@ const WatchTypeList = () => {
 
   return (
     <Row gutter={[16, 16]} justify="center" style={{ marginBottom: "24px" }}>
-      {watchTypes.map((type) => (
+      {productTypes.map((type) => (
         <Col key={type.name} span={4}>
           <Card
             hoverable
@@ -56,4 +56,4 @@ const WatchTypeList = () => {
   );
 };
 
-export default WatchTypeList;
+export default ProductTypeList;

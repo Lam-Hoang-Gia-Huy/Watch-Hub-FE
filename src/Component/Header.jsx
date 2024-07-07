@@ -138,7 +138,7 @@ const HeaderBar = () => {
       <Col span={9} style={{ display: "flex", alignItems: "center" }}>
         {auth?.role !== "STAFF" && (
           <Search
-            placeholder="Search watches"
+            placeholder="Search products"
             onSearch={handleSearch}
             style={{ width: 200, marginRight: 16 }}
             enterButton={<FontAwesomeIcon icon={faMagnifyingGlass} />}

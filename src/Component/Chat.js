@@ -159,7 +159,7 @@ const Chat = ({ onNewMessage }) => {
                 <Conversation
                   key={session.id}
                   name={`${otherUser.firstName} ${otherUser.lastName}`}
-                  info={session.watch.name}
+                  info={session.product.name}
                   onClick={() => handleSessionClick(session)}
                 >
                   <Avatar
@@ -245,31 +245,32 @@ const Chat = ({ onNewMessage }) => {
         <Sidebar position="right">
           <ExpansionPanel open title="INFO">
             <p>
-              <strong>Watch Name:</strong> {selectedSession.watch.name}
+              <strong>Pruduct Name:</strong> {selectedSession.product.name}
             </p>
             <p>
-              <strong>Brand:</strong> {selectedSession.watch.brand}
+              <strong>Brand:</strong> {selectedSession.product.brand}
             </p>
             <p>
-              <strong>Description:</strong> {selectedSession.watch.description}
+              <strong>Description:</strong>{" "}
+              {selectedSession.product.description}
             </p>
             <p>
               <strong>Status:</strong>{" "}
-              {selectedSession.watch.status ? "Available" : "Not Available"}
+              {selectedSession.product.status ? "Available" : "Not Available"}
             </p>
             <p>
               <strong>Price:</strong>{" "}
-              {selectedSession.watch.price
-                ? `$${selectedSession.watch.price}`
+              {selectedSession.product.price
+                ? `$${selectedSession.product.price}`
                 : "N/A"}
             </p>
             <p>
               <strong>Created Date:</strong>{" "}
-              {new Date(selectedSession.watch.createdDate).toLocaleString()}
+              {new Date(selectedSession.product.createdDate).toLocaleString()}
             </p>
             <img
-              src={selectedSession.watch.imageUrl[0]}
-              alt={selectedSession.watch.name}
+              src={selectedSession.product.imageUrl[0]}
+              alt={selectedSession.product.name}
               style={{ width: "60%", height: "auto" }}
             />
           </ExpansionPanel>

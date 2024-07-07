@@ -4,7 +4,7 @@ import axios from "axios";
 import { Button, message } from "antd";
 import useAuth from "./Hooks/useAuth";
 
-const ChatStartButton = ({ watchId, userId, appraiserId }) => {
+const ChatStartButton = ({ productId, userId, staffId }) => {
   const navigate = useNavigate();
   const { auth } = useAuth();
 
@@ -13,9 +13,9 @@ const ChatStartButton = ({ watchId, userId, appraiserId }) => {
       const response = await axios.post(
         "http://localhost:8080/api/v1/chat/start",
         {
-          watchId,
+          productId,
           userId,
-          appraiserId,
+          staffId,
         },
         {
           headers: {
