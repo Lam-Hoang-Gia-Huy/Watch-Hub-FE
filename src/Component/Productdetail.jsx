@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Carousel, message, List, Avatar, Rate } from "antd";
+import { Carousel, message, List, Avatar, Rate, Select } from "antd";
 import axios from "axios";
 import { Layout, Col, Row, Button, Typography } from "antd";
 import moment from "moment";
@@ -14,11 +14,14 @@ import "react-photo-view/dist/react-photo-view.css";
 
 const { Text } = Typography;
 const { Content } = Layout;
+const { Option } = Select;
 
 const ProductDetail = () => {
   let { id } = useParams();
   const [productData, setProductData] = useState(null);
   const [feedbackData, setFeedbackData] = useState([]);
+  const [staffList, setStaffList] = useState([]);
+  const [selectedStaffId, setSelectedStaffId] = useState(null);
   const [loading, setLoading] = useState(true);
   const { auth } = useAuth();
   const navigate = useNavigate();
@@ -36,6 +39,11 @@ const ProductDetail = () => {
           `http://localhost:8080/api/v1/feedback/product/${id}`
         );
         setFeedbackData(feedbackResponse.data);
+
+        const staffResponse = await axios.get(
+          `http://localhost:8080/api/v1/user/staff`
+        );
+        setStaffList(staffResponse.data);
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
@@ -79,7 +87,7 @@ const ProductDetail = () => {
     return <Loading />;
   }
 
-  const showAddToCartButton = productData.status === true;
+  const showAddToCartButton = productData?.status === true;
 
   return (
     <Content
@@ -152,25 +160,58 @@ const ProductDetail = () => {
               {moment(productData.createdDate).fromNow()}
             </Text>
           </div>
-          {/* <ChatStartButton
-            productId={productData.id}
-            userId={auth.id}
-            Id={auth.id}
-          /> */}
+          <div style={{ marginBottom: "10px" }}>
+            <Text strong style={{ fontSize: "16px", color: "#666" }}>
+              Rating:{" "}
+            </Text>
+            <Rate disabled allowHalf value={productData.averageScore} />
+          </div>
 
-          {showAddToCartButton && (
+          {auth && auth.role !== "ADMIN" && auth.role !== "STAFF" && (
+            <>
+              <Select
+                placeholder="Select a staff member"
+                onChange={(value) => setSelectedStaffId(value)}
+                style={{ width: "100%", marginBottom: "10px" }}
+              >
+                {staffList.map((staff) => (
+                  <Option key={staff.id} value={staff.id}>
+                    {staff.name}
+                  </Option>
+                ))}
+              </Select>
+              <ChatStartButton
+                productId={productData.id}
+                userId={auth.id}
+                staffId={selectedStaffId}
+              />
+            </>
+          )}
+          {auth && auth.role == "ADMIN" && (
             <Button
               type="primary"
-              style={{
-                background: "#ff4d4f",
-                borderColor: "#ff4d4f",
-                marginTop: "10px",
-              }}
-              onClick={addToCart}
+              onClick={() => navigate(`/product/update/${productData.id}`)}
             >
-              Add to Cart <FontAwesomeIcon size="lg" icon={faCartShopping} />
+              Update this product
             </Button>
           )}
+
+          {showAddToCartButton &&
+            auth &&
+            auth.role !== "ADMIN" &&
+            auth.role !== "STAFF" && (
+              <Button
+                type="primary"
+                style={{
+                  background: "#ff4d4f",
+                  borderColor: "#ff4d4f",
+                  marginTop: "10px",
+                }}
+                onClick={addToCart}
+              >
+                Add to Cart <FontAwesomeIcon size="lg" icon={faCartShopping} />
+              </Button>
+            )}
         </Col>
       </Row>
 

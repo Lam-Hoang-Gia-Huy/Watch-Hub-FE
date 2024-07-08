@@ -33,9 +33,7 @@ const ChatStartButton = ({ productId, userId, staffId }) => {
         } else if (error.response.data) {
           message.error(error.response.data.message);
         } else {
-          message.error(
-            "Failed to start chat session. Please try again later."
-          );
+          message.error("Failed to start chat session. Please choose staff!");
         }
       }
     }
@@ -43,7 +41,7 @@ const ChatStartButton = ({ productId, userId, staffId }) => {
 
   return (
     <Button type="primary" onClick={startChatSession}>
-      Chat with seller
+      Chat with store
     </Button>
   );
 };

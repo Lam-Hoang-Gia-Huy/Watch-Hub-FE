@@ -19,7 +19,7 @@ const { Title } = Typography;
 const LOGIN_URL = "http://localhost:8080/api/v1/auth/authenticate"; // Change this to your actual login endpoint URL
 
 const LoginPage = () => {
-  const { auth, setAuth } = useAuth();
+  const { setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";

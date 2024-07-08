@@ -63,10 +63,23 @@ const Revenue = () => {
   };
 
   const formatRevenueData = (data) => {
-    return Object.entries(data).map(([key, value]) => ({
-      period: key,
-      revenue: value,
-    }));
+    return Object.entries(data)
+      .map(([key, value]) => ({
+        period: key,
+        revenue: value,
+      }))
+      .sort((a, b) => {
+        // Sort logic for years and months
+        if (a.period.includes("Year") && b.period.includes("Year")) {
+          return a.period.localeCompare(b.period);
+        } else if (a.period.includes("Month") && b.period.includes("Month")) {
+          const monthA = parseInt(a.period.split(" ")[1]);
+          const monthB = parseInt(b.period.split(" ")[1]);
+          return monthA - monthB;
+        } else {
+          return 0;
+        }
+      });
   };
 
   const chartData = formatRevenueData(revenueData);
@@ -100,9 +113,9 @@ const Revenue = () => {
               Monthly Revenue
             </Button>
           </Form.Item>
-          <Form.Item>
+          {/* <Form.Item>
             <RangePicker onChange={handleDateRangeRevenue} />
-          </Form.Item>
+          </Form.Item> */}
         </Form>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart

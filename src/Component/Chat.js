@@ -147,18 +147,16 @@ const Chat = ({ onNewMessage }) => {
   return (
     <MainContainer responsive style={{ height: "600px" }}>
       <Sidebar position="left">
-        <Search placeholder="Search..." />
+        {/* <Search placeholder="Search..." /> */}
         {sessions.length > 0 ? (
           <ConversationList>
             {sessions.map((session) => {
               const otherUser =
-                session.seller.id === auth.id
-                  ? session.appraiser
-                  : session.seller;
+                session.user.id === auth.id ? session.staff : session.user;
               return (
                 <Conversation
                   key={session.id}
-                  name={`${otherUser.firstName} ${otherUser.lastName}`}
+                  name={`${otherUser.name}`}
                   info={session.product.name}
                   onClick={() => handleSessionClick(session)}
                 >
@@ -184,21 +182,21 @@ const Chat = ({ onNewMessage }) => {
             <ConversationHeader.Back />
             <Avatar
               name={
-                selectedSession.seller.id === auth.id
-                  ? `${selectedSession.appraiser.firstName} ${selectedSession.appraiser.lastName}`
-                  : `${selectedSession.seller.firstName} ${selectedSession.seller.lastName}`
+                selectedSession.user.id === auth.id
+                  ? `${selectedSession.staff.name} `
+                  : `${selectedSession.user.name} `
               }
               src={
-                selectedSession.seller.id === auth.id
-                  ? selectedSession.appraiser.avatarUrl
-                  : selectedSession.seller.avatarUrl
+                selectedSession.user.id === auth.id
+                  ? selectedSession.staff.avatarUrl
+                  : selectedSession.user.avatarUrl
               }
             />
             <ConversationHeader.Content
               userName={
-                selectedSession.seller.id === auth.id
-                  ? `${selectedSession.appraiser.firstName} ${selectedSession.appraiser.lastName}`
-                  : `${selectedSession.seller.firstName} ${selectedSession.seller.lastName}`
+                selectedSession.user.id === auth.id
+                  ? `${selectedSession.staff.name} `
+                  : `${selectedSession.user.name} `
               }
             />
             <ConversationHeader.Actions>
@@ -207,7 +205,7 @@ const Chat = ({ onNewMessage }) => {
           </ConversationHeader>
 
           <MessageList>
-            <MessageSeparator content="Today" />
+            <MessageSeparator />
             {messages.map((msg) => (
               <Message
                 key={msg.id}
@@ -219,10 +217,7 @@ const Chat = ({ onNewMessage }) => {
                   sentTime: msg.timestamp,
                 }}
               >
-                <Avatar
-                  name="User"
-                  src="https://chatscope.io/storybook/react/assets/user.svg"
-                />
+                <Avatar name="User" src={auth.avatarUrl} />
               </Message>
             ))}
           </MessageList>
@@ -248,7 +243,7 @@ const Chat = ({ onNewMessage }) => {
               <strong>Pruduct Name:</strong> {selectedSession.product.name}
             </p>
             <p>
-              <strong>Brand:</strong> {selectedSession.product.brand}
+              <strong>Brand:</strong> {selectedSession.product.category}
             </p>
             <p>
               <strong>Description:</strong>{" "}
@@ -261,7 +256,7 @@ const Chat = ({ onNewMessage }) => {
             <p>
               <strong>Price:</strong>{" "}
               {selectedSession.product.price
-                ? `$${selectedSession.product.price}`
+                ? `${selectedSession.product.price}đ`
                 : "N/A"}
             </p>
             <p>

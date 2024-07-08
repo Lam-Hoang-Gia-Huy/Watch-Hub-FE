@@ -10,6 +10,7 @@ const ItemList = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { auth } = useAuth();
 
   const navigate = useNavigate();
 
@@ -19,10 +20,11 @@ const ItemList = () => {
         const response = await axios.get(
           "http://localhost:8080/api/v1/product"
         );
-        const filteredProduct = response.data.filter(
-          (product) => product.status == true
-        );
-        setItems(filteredProduct);
+        const filteredProducts =
+          auth?.role === "ADMIN" || auth?.role === "STAFF"
+            ? response.data
+            : response.data.filter((product) => product.status === true);
+        setItems(filteredProducts);
         setLoading(false);
       } catch (err) {
         setError(err);
@@ -31,7 +33,7 @@ const ItemList = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [auth]);
 
   const getTimeSincePost = (postDate) => {
     const now = moment();
@@ -73,9 +75,9 @@ const ItemList = () => {
         <Col key={item.id} span={6}>
           <Card
             hoverable
-            title={"Title: " + item.name}
+            title={`Title: ${item.name}`}
             bordered={true}
-            style={{ background: "#f2e5e5" }}
+            style={{ background: "#f2e5e5", marginBottom: "15px" }}
             onClick={() => handleItemClick(item.id)}
             cover={
               <img
@@ -93,7 +95,6 @@ const ItemList = () => {
             <div className="item-details">
               <span className="item-brand">{item.category}</span>
             </div>
-
             <div className="item-details">
               <span className="item-post-date">
                 {getTimeSincePost(item?.createdDate)}

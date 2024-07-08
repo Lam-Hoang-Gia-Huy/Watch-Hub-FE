@@ -14,8 +14,6 @@ import LayoutCom from "./Component/Layout";
 import Cart from "./Component/Cart";
 import MyPost from "./Component/MyPost";
 import UserDetail from "./Component/UserProfile";
-import UnappraisedWatches from "./Component/UnappraisedWatches";
-import AppraiseWatch from "./Component/AppraiseWatch";
 import PaymentReturn from "./Component/PaymentReturn";
 import MyOrders from "./Component/MyOrders";
 import OrderDetail from "./Component/OrderDetail";
@@ -23,8 +21,11 @@ import Chat from "./Component/Chat";
 import UserManagement from "./Component/UserManagement";
 import CreateFeedback from "./Component/FeedbackPage";
 import Revenue from "./Component/Revenue";
-import VoucherApproval from "./Component/VoucherApproval";
 import VoucherForm from "./Component/VoucherForm";
+import VoucherList from "./Component/VoucherList";
+import UpdateProduct from "./Component/UpdateProduct";
+import AllOrders from "./Component/AllOrders";
+import OrderDetailForStaff from "./Component/OrderDetailForStaff";
 const App = () => {
   return (
     <Routes>
@@ -46,21 +47,28 @@ const App = () => {
           />
         </Route>
         <Route path="/register" element={<Register />} />
-        <Route element={<RequireAuth roles={["STAFF"]} />}>
-          <Route path="/unappraised-watches" element={<UnappraisedWatches />} />
-          <Route path="/appraise-watch/:id" element={<AppraiseWatch />} />
-          <Route path="/create-voucher" element={<VoucherForm />} />
-        </Route>
+        <Route element={<RequireAuth roles={["STAFF"]} />}></Route>
         <Route element={<RequireAuth roles={["USER", "STAFF"]} />}>
+          <Route path="/chat" element={<Chat />} />
+        </Route>
+        <Route element={<RequireAuth roles={["USER", "STAFF", "ADMIN"]} />}>
           <Route path="/profile" element={<Profile />} />
           <Route path="/edit-profile" element={<EditProfile />} />
-          <Route path="/chat" element={<Chat />} />
+        </Route>
+        <Route element={<RequireAuth roles={["ADMIN", "STAFF"]} />}>
+          <Route path="/vouchers" element={<VoucherList />} />
+          <Route path="/create-voucher" element={<VoucherForm />} />
+          <Route path="/store-orders" element={<AllOrders />} />
+          <Route
+            path="/store-orders-items/:orderId"
+            element={<OrderDetailForStaff />}
+          />
         </Route>
 
         <Route element={<RequireAuth roles={["ADMIN"]} />}>
           <Route path="users" element={<UserManagement />} />
           <Route path="revenue" element={<Revenue />} />
-          <Route path="voucher-approve" element={<VoucherApproval />} />
+          <Route path="/product/update/:id" element={<UpdateProduct />} />
         </Route>
         <Route path="/user/:id" element={<UserDetail />} />
         <Route path="/payment-return" element={<PaymentReturn />} />

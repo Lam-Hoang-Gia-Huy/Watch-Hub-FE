@@ -5,6 +5,7 @@ import { Row, Col, Card, Slider, Input, Select, Button } from "antd";
 import { Content } from "antd/es/layout/layout";
 import Loading from "./Loading";
 import { theme } from "antd";
+import useAuth from "./Hooks/useAuth"; // Import the useAuth hook
 
 const { Option } = Select;
 
@@ -38,6 +39,7 @@ const ProductFilter = () => {
   };
 
   const navigate = useNavigate();
+  const { auth } = useAuth(); // Get the auth object
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,10 +56,14 @@ const ProductFilter = () => {
             },
           }
         );
-        const filteredProducts = response.data.filter(
-          (product) =>
-            (!type || product.category === type) && product.status === true
-        );
+        const filteredProducts =
+          auth?.role === "ADMIN" || auth?.role === "STAFF"
+            ? response.data
+            : response.data.filter(
+                (product) =>
+                  (!type || product.category === type) &&
+                  product.status === true
+              );
         setProducts(filteredProducts);
       } catch (error) {
         console.error("Error fetching product details: ", error);
@@ -66,7 +72,7 @@ const ProductFilter = () => {
       }
     };
     fetchData();
-  }, [type, searchTerm, category, priceRange]);
+  }, [type, searchTerm, category, priceRange, auth]);
 
   const sortItems = (sortBy) => {
     const sortedItems = [...products];

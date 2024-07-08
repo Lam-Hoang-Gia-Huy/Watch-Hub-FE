@@ -16,6 +16,7 @@ import {
   faMagnifyingGlass,
   faFolder,
   faUserAlt,
+  faTicket,
 } from "@fortawesome/free-solid-svg-icons";
 
 const { Header } = Layout;
@@ -70,17 +71,19 @@ const HeaderBar = () => {
           onClick={handleClick}
           style={{ flex: 1, minWidth: 0 }}
         >
-          {auth?.role !== "ADMIN" && (
-            <Menu.Item key="home">
-              <FontAwesomeIcon size="lg" icon={faHome} />
-              Home
-            </Menu.Item>
-          )}
+          <Menu.Item key="home">
+            <FontAwesomeIcon size="lg" icon={faHome} />
+            Home
+          </Menu.Item>
+
           {auth?.role === "ADMIN" && (
             <>
               <Menu.Item key="users">
                 <FontAwesomeIcon size="lg" icon={faUserAlt} />
                 User Management
+              </Menu.Item>
+              <Menu.Item key="store-orders">
+                <FontAwesomeIcon size="lg" icon={faFolder} /> Store Orders{" "}
               </Menu.Item>
               <Menu.Item key="revenue">
                 <FontAwesomeIcon size="lg" icon={faUserAlt} />
@@ -89,8 +92,12 @@ const HeaderBar = () => {
               <Menu.Item key="upload">
                 <FontAwesomeIcon size="lg" icon={faUpload} /> Upload Product
               </Menu.Item>
-              <Menu.Item key="voucher-approve">
-                <FontAwesomeIcon size="lg" icon={faUpload} /> Approve voucher
+
+              <Menu.Item key="create-voucher">
+                <FontAwesomeIcon size="lg" icon={faUpload} /> Create voucher
+              </Menu.Item>
+              <Menu.Item key="vouchers">
+                <FontAwesomeIcon size="lg" icon={faTicket} /> Voucher List
               </Menu.Item>
             </>
           )}
@@ -106,9 +113,17 @@ const HeaderBar = () => {
             </>
           )}
           {auth && auth?.role === "STAFF" && (
-            <Menu.Item key="create-voucher">
-              <FontAwesomeIcon size="lg" icon={faUpload} /> Create voucher
-            </Menu.Item>
+            <>
+              <Menu.Item key="store-orders">
+                <FontAwesomeIcon size="lg" icon={faFolder} /> Store Orders{" "}
+              </Menu.Item>
+              <Menu.Item key="create-voucher">
+                <FontAwesomeIcon size="lg" icon={faUpload} /> Create voucher
+              </Menu.Item>
+              <Menu.Item key="vouchers">
+                <FontAwesomeIcon size="lg" icon={faTicket} /> Voucher List
+              </Menu.Item>
+            </>
           )}
           {auth && (auth?.role === "STAFF" || auth?.role === "USER") && (
             <Menu.Item key="chat">

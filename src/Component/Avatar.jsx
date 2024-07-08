@@ -19,7 +19,6 @@ const AvatarDropdown = () => {
       }}
     >
       <Menu.Item key="profile">Profile</Menu.Item>
-      <Menu.Item key="mypost">My Post</Menu.Item>
     </Menu>
   );
 
