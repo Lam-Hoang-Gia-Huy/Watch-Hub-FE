@@ -18,6 +18,7 @@ import {
   faUserAlt,
   faTicket,
 } from "@fortawesome/free-solid-svg-icons";
+import Logo from "../Image/avatar-(ProfilePictureMaker.com).png";
 
 const { Header } = Layout;
 const { Search } = Input;
@@ -57,13 +58,10 @@ const HeaderBar = () => {
         alignItems: "center",
       }}
     >
-      <Col span={3}>
-        <Image
-          src="https://placeholderlogo.com/img/placeholder-logo-1.png"
-          height={60}
-        />
+      <Col span={2}>
+        <Image src={Logo} height={50} />
       </Col>
-      <Col span={12}>
+      <Col span={13}>
         <Menu
           theme="dark"
           mode="horizontal"
